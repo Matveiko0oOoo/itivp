@@ -1,6 +1,7 @@
 <?php
 require_once '../dbConf/config.php';
 
+// Processing success messages
 $success_message = '';
 if (isset($_GET['deleted']) && $_GET['deleted'] == '1') {
     $success_message = 'Подарок успешно удален!';
@@ -8,17 +9,45 @@ if (isset($_GET['deleted']) && $_GET['deleted'] == '1') {
     $success_message = htmlspecialchars($_GET['message']);
 }
 
+// Error handling
 $error = '';
 if (isset($_GET['error'])) {
     $error = htmlspecialchars($_GET['error']);
 }
 
+// Prepare the SQL query based on search and filter parameters
+$sql = "SELECT * FROM gifts WHERE 1=1";
+$params = [];
+
+// Search by title
+$search_title = $_GET['search_title'] ?? '';
+if (!empty($search_title)) {
+    $sql .= " AND title LIKE ?";
+    $params[] = '%' . $search_title . '%';
+}
+
+// Filter by recipient
+$filter_for_whom = $_GET['filter_for_whom'] ?? '';
+if (!empty($filter_for_whom)) {
+    $sql .= " AND for_whom = ?";
+    $params[] = $filter_for_whom;
+}
+
+$sql .= " ORDER BY created_at DESC";
+
 try {
-    $stmt = $pdo->query("SELECT * FROM gifts ORDER BY created_at DESC");
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $gifts = $stmt->fetchAll();
+
+    // Get unique recipients for the filter dropdown
+    $stmt_recipients = $pdo->query("SELECT DISTINCT for_whom FROM gifts ORDER BY for_whom");
+    $recipients = $stmt_recipients->fetchAll(PDO::FETCH_COLUMN);
+
 } catch(PDOException $e) {
     $error = "Ошибка при загрузке подарков: " . $e->getMessage();
     $gifts = [];
+    $recipients = [];
 }
 ?>
 
@@ -79,6 +108,32 @@ try {
                 </div>
             </div>
         </div>
+        <div class="row mb-4">
+            <div class="col-12">
+                <form action="index.php" method="GET" class="d-flex flex-column flex-md-row align-items-center justify-content-between">
+                    <div class="input-group mb-2 mb-md-0 me-md-2 flex-grow-1">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search_title" class="form-control" placeholder="Поиск по названию подарка" value="<?= htmlspecialchars($search_title) ?>">
+                    </div>
+                    <div class="input-group flex-grow-1 me-md-2">
+                        <label class="input-group-text" for="filter_for_whom"><i class="fas fa-filter"></i></label>
+                        <select class="form-select" id="filter_for_whom" name="filter_for_whom">
+                            <option value="">Все</option>
+                            <?php foreach ($recipients as $recipient): ?>
+                                <option value="<?= htmlspecialchars($recipient) ?>" <?= $filter_for_whom === $recipient ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($recipient) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2 mt-md-0">Показать</button>
+                    <?php if (!empty($search_title) || !empty($filter_for_whom)): ?>
+                        <a href="index.php" class="btn btn-outline-secondary mt-2 mt-md-0 ms-md-2">Сброс</a>
+                    <?php endif; ?>
+                </form>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <?php if ($success_message): ?>
@@ -182,6 +237,7 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Confirmation modal logic
             const modal = document.getElementById('confirmationModal');
             const messageElement = document.getElementById('confirmationMessage');
             const confirmButton = document.getElementById('confirmAction');
