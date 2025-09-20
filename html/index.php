@@ -1,7 +1,6 @@
 <?php
 require_once '../dbConf/config.php';
 
-// Processing success messages
 $success_message = '';
 if (isset($_GET['deleted']) && $_GET['deleted'] == '1') {
     $success_message = 'Подарок успешно удален!';
