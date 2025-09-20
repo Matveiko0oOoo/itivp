@@ -1,0 +1,57 @@
+body {
+background-image: url('../img/background.png');
+background-size: cover;
+background-repeat: no-repeat;
+background-attachment: fixed;
+background-position: center center;
+padding-top: 70px;
+}
+.gift-card {
+transition: transform 0.2s;
+background-color: rgba(255, 255, 255, 0.9);
+}
+.gift-card:hover {
+transform: translateY(-2px);
+}
+.status-badge {
+font-size: 0.8em;
+}
+.budget-text {
+font-weight: bold;
+color: #28a745;
+}
+.for-whom-text {
+color: #6c757d;
+font-style: italic;
+}
+.modal-footer .btn-danger {
+background-color: #dc3545;
+border-color: #dc3545;
+}
+.bg-purple-custom {
+background-color: #BF8FCC !important;
+}
+.navbar-brand .fa-gift{
+color: #FFD700;
+}
+.navbar-brand .fa-plus-circle {
+color: #FFD700 !important;
+}
+.btn-yellow-custom {
+background-color: #FFD700;
+border-color: #FFD700;
+color: #212529;
+}
+.btn-yellow-custom:hover {
+background-color: #FFC107;
+border-color: #FFC107;
+color: #212529;
+}
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    margin-top: 100px;
+}
+.required {
+    color: #dc3545;
+}
