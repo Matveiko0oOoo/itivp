@@ -9,24 +9,20 @@ if (isset($_GET['deleted']) && $_GET['deleted'] == '1') {
     $success_message = htmlspecialchars($_GET['message']);
 }
 
-// Error handling
 $error = '';
 if (isset($_GET['error'])) {
     $error = htmlspecialchars($_GET['error']);
 }
 
-// Prepare the SQL query based on search and filter parameters
 $sql = "SELECT * FROM gifts WHERE 1=1";
 $params = [];
 
-// Search by title
 $search_title = $_GET['search_title'] ?? '';
 if (!empty($search_title)) {
     $sql .= " AND title LIKE ?";
     $params[] = '%' . $search_title . '%';
 }
 
-// Filter by recipient
 $filter_for_whom = $_GET['filter_for_whom'] ?? '';
 if (!empty($filter_for_whom)) {
     $sql .= " AND for_whom = ?";
@@ -40,7 +36,6 @@ try {
     $stmt->execute($params);
     $gifts = $stmt->fetchAll();
 
-    // Get unique recipients for the filter dropdown
     $stmt_recipients = $pdo->query("SELECT DISTINCT for_whom FROM gifts ORDER BY for_whom");
     $recipients = $stmt_recipients->fetchAll(PDO::FETCH_COLUMN);
 
